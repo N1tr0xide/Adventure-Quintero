@@ -1,34 +1,31 @@
 using UnityEngine;
 
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
 {
-    private Rigidbody2D rb;
-    private Vector2 moveDirection;
-    [SerializeField] private float speed;
+    private Rigidbody2D _rb;
+    private PlayerInput _input;
+    private Vector2 _moveDirection;
+    [SerializeField] private float _speed;
+
+    public Rigidbody2D Rigidbody => _rb;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        moveDirection = Vector2.zero;
+        _rb = GetComponent<Rigidbody2D>();
+        _input = GetComponent<PlayerInput>();
+        _moveDirection = Vector2.zero;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKey(KeyCode.UpArrow))
-        {
-            print("moced");
-            moveDirection.y = 1;
-        }
-        else
-        {
-            moveDirection.y = 0;
-        }
+        _moveDirection = _input.MoveInput;
     }
 
     private void FixedUpdate()
     {
-        rb.linearVelocity = moveDirection * speed;
+        _rb.linearVelocity = _moveDirection * _speed;
     }
 }
