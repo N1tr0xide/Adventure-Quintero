@@ -1,15 +1,15 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.XInput;
 
 public class PlayerInput : MonoBehaviour
 {
     private InputSystem_Actions _input;
     private Vector2 _moveInput;
+    private Vector2 _lastInput;
 
     public Vector2 MoveInput => _moveInput;
     public InputSystem_Actions PlayerInputActions => _input;
+    public Vector2 LastInput => _lastInput;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -27,5 +27,6 @@ public class PlayerInput : MonoBehaviour
     void Update()
     {
         _moveInput = _input.Player.Move.ReadValue<Vector2>();
+        if (LastInput != Vector2.zero) _lastInput = _moveInput;
     }
 }
