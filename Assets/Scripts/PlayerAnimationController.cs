@@ -3,10 +3,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(PlayerController))]
 public class PlayerAnimationController : MonoBehaviour
 {
-    private PlayerController _controller;
+    private PlayerController playerState;
     private PlayerInput _input;
     private bool _cancelMoveAnim;
 
@@ -30,7 +29,7 @@ public class PlayerAnimationController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        _controller = GetComponent<PlayerController>();
+        _controller = GetComponent<PlayerMovement>();
         _input = GetComponent<PlayerInput>();
         _input.PlayerInputActions.Player.Attack.performed += OnAttack;
     }
@@ -77,6 +76,7 @@ public class PlayerAnimationController : MonoBehaviour
 
     private void OnAttack(InputAction.CallbackContext context)
     {
+        if (_controller.IsAttacking) return;
         _cancelMoveAnim = true;
         
         switch (_currentClip)
