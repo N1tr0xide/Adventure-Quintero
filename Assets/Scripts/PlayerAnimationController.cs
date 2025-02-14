@@ -1,106 +1,73 @@
 using System;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerAnimationController : MonoBehaviour
 {
-    private PlayerController playerState;
-    private PlayerInput _input;
-    private bool _cancelMoveAnim;
-
-    enum AnimationClips
-    {
-        IdleX,
-        IdleUp,
-        IdleDown,
-        MoveX,
-        MoveUp,
-        MoveDown,
-        AttackX,
-        AttackUp,
-        AttackDown
-    }
-    private AnimationClips _currentClip;
-    
+    private PlayerController _controller;
     [SerializeField] private SpriteRenderer _spriteRenderer;
     [SerializeField] private Animator _animator;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        _controller = GetComponent<PlayerMovement>();
-        _input = GetComponent<PlayerInput>();
-        _input.PlayerInputActions.Player.Attack.performed += OnAttack;
+        _controller = GetComponent<PlayerController>();
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if(_cancelMoveAnim) return;
-        if (_controller.Rigidbody.linearVelocity != Vector2.zero)
+        switch (_controller.CurrentState)
         {
-            //horizontal priority
-            if (Mathf.Abs(_controller.Rigidbody.linearVelocity.x) > Mathf.Abs(_controller.Rigidbody.linearVelocity.y))
-            {
+            case EntityStates.MoveRight:
                 _animator.Play("anim_player_moveX");
-                _currentClip = AnimationClips.MoveX;
-                _spriteRenderer.flipX = _controller.Rigidbody.linearVelocity.x < 0;
-            }
-            else //vertical priority
-            {
-                bool movingUp = _controller.Rigidbody.linearVelocity.y > 0;
-                _animator.Play(movingUp? "anim_player_moveY+" : "anim_player_moveY-");
-                _currentClip = movingUp? AnimationClips.MoveUp : AnimationClips.MoveDown;
-            } 
-        }
-        else
-        {
-            switch (_currentClip)
-            {
-                case AnimationClips.MoveX: case AnimationClips.AttackX:
-                    _currentClip = AnimationClips.IdleX;
-                    _animator.Play("anim_player_idleX");
-                    break;
-                case AnimationClips.MoveUp: case AnimationClips.AttackUp:
-                    _currentClip = AnimationClips.IdleUp;
-                    _animator.Play("anim_player_idleY+");
-                    break;
-                case AnimationClips.MoveDown: case AnimationClips.AttackDown:
-                    _currentClip = AnimationClips.IdleDown;
-                    _animator.Play("anim_player_idleY-");
-                    break;
-            }
-        }
-    }
-
-    private void OnAttack(InputAction.CallbackContext context)
-    {
-        if (_controller.IsAttacking) return;
-        _cancelMoveAnim = true;
-        
-        switch (_currentClip)
-        {
-            case AnimationClips.MoveX: case AnimationClips.IdleX:
-                _currentClip = AnimationClips.AttackX;
+                _spriteRenderer.flipX = false;
+                break;
+            case EntityStates.MoveLeft:
+                _animator.Play("anim_player_moveX");
+                _spriteRenderer.flipX = true;
+                break;
+            case EntityStates.MoveUp:
+                _animator.Play("anim_player_moveY+");
+                _spriteRenderer.flipX = false;
+                break;
+            case EntityStates.MoveDown:
+                _animator.Play("anim_player_moveY-");
+                _spriteRenderer.flipX = false;
+                break;
+            case EntityStates.IdleRight:
+                _animator.Play("anim_player_idleX");
+                _spriteRenderer.flipX = false;
+                break;
+            case EntityStates.IdleLeft:
+                _animator.Play("anim_player_idleX");
+                _spriteRenderer.flipX = true;
+                break;
+            case EntityStates.IdleUp:
+                _animator.Play("anim_player_idleY+");
+                _spriteRenderer.flipX = false;
+                break;
+            case EntityStates.IdleDown:
+                _animator.Play("anim_player_idleY-");
+                _spriteRenderer.flipX = false;
+                break;
+            case EntityStates.AttackingRight:
                 _animator.Play("anim_player_attackX");
+                _spriteRenderer.flipX = false;
                 break;
-            case AnimationClips.MoveUp: case AnimationClips.IdleUp:
-                _currentClip = AnimationClips.AttackUp;
+            case EntityStates.AttackingLeft:
+                _animator.Play("anim_player_attackX");
+                _spriteRenderer.flipX = true;
+                break;
+            case EntityStates.AttackingUp:
                 _animator.Play("anim_player_attackY+");
+                _spriteRenderer.flipX = false;
                 break;
-            case AnimationClips.MoveDown: case AnimationClips.IdleDown:
-                _currentClip = AnimationClips.AttackDown;
+            case EntityStates.AttackingDown:
                 _animator.Play("anim_player_attackY-");
+                _spriteRenderer.flipX = false;
                 break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
-        
-        StartCoroutine(AllowMoveAnim(.333f));
-    }
-
-    private IEnumerator AllowMoveAnim(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        _cancelMoveAnim = false;
     }
 }

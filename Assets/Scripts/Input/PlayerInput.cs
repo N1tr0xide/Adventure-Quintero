@@ -7,7 +7,7 @@ public class PlayerInput : MonoBehaviour
     private Vector2 _moveInput;
 
     public Vector2 MoveInput => _moveInput;
-    public InputSystem_Actions PlayerInputActions => _input;
+    public InputSystem_Actions PlayerActions => _input;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
