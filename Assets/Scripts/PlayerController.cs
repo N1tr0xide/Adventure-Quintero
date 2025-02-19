@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,8 +8,8 @@ public class PlayerController : MonoBehaviour
 {
     private PlayerInput _input;
     private Rigidbody2D _rb;
-    private bool _isAttacking;
-    private EntityStates _currentState;
+    private bool _isAttacking, _isBeingDamaged;
+    private const int MaxHealth = 6;
 
     [SerializeField] private float _speed;
     [Header("Attack Areas")]
@@ -17,7 +18,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Collider2D _leftArea;
     [SerializeField] private Collider2D _rightArea;
 
-    public EntityStates CurrentState => _currentState;
+    public event Action OnDamaged;
+    public int Health { get; private set; }
+    public EntityStates CurrentState { get; private set; }
+
+    private void Awake()
+    {
+        Health = MaxHealth;
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -25,7 +33,7 @@ public class PlayerController : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
         _input = GetComponent<PlayerInput>();
         _input.PlayerActions.Player.Attack.performed += OnAttack;
-
+        
         //disable attack area
         _upArea.enabled = false;
         _downArea.enabled = false;
@@ -36,12 +44,12 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!_isAttacking) UpdateMovementState();
+        if (!_isAttacking && !_isBeingDamaged) UpdateMovementState();
     }
     
     private void FixedUpdate()
     {
-        _rb.linearVelocity = _input.MoveInput * _speed;
+        if(!_isBeingDamaged) _rb.linearVelocity = _input.MoveInput * _speed;
     }
 
     private void UpdateMovementState()
@@ -51,17 +59,17 @@ public class PlayerController : MonoBehaviour
             //horizontal movement
             if (Mathf.Abs(_rb.linearVelocity.x) > Mathf.Abs(_rb.linearVelocity.y))
             {
-                _currentState = _rb.linearVelocity.x < 0 ? EntityStates.MoveLeft : EntityStates.MoveRight;
+                CurrentState = _rb.linearVelocity.x < 0 ? EntityStates.MoveLeft : EntityStates.MoveRight;
                 return;
             }
             
             //vertical movement
-            _currentState = _rb.linearVelocity.y > 0 ? EntityStates.MoveUp : EntityStates.MoveDown;
+            CurrentState = _rb.linearVelocity.y > 0 ? EntityStates.MoveUp : EntityStates.MoveDown;
             return;
         }
         
         //Idle
-        _currentState = _currentState switch
+        CurrentState = CurrentState switch
         {
             EntityStates.MoveRight => EntityStates.IdleRight,
             EntityStates.AttackingRight => EntityStates.IdleRight,
@@ -71,14 +79,21 @@ public class PlayerController : MonoBehaviour
             EntityStates.AttackingUp => EntityStates.IdleUp,
             EntityStates.MoveDown => EntityStates.IdleDown,
             EntityStates.AttackingDown => EntityStates.IdleDown,
-            _ => _currentState
+            _ => CurrentState
         };
     }
 
     private void OnAttack(InputAction.CallbackContext obj)
     {
-        if (_isAttacking) return;
-        StartCoroutine(_Attack());
+        if (!_isAttacking) StartCoroutine(_Attack());
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Enemy"))
+        {
+            if(!_isBeingDamaged) StartCoroutine(_Damage(other.transform.position));
+        }
     }
 
     private IEnumerator _Attack()
@@ -86,25 +101,25 @@ public class PlayerController : MonoBehaviour
         _isAttacking = true;
         Collider2D activatedArea = null;
 
-        switch (_currentState)
+        switch (CurrentState)
         {
             case EntityStates.IdleRight: case EntityStates.MoveRight:
-                _currentState = EntityStates.AttackingRight;
+                CurrentState = EntityStates.AttackingRight;
                 _rightArea.enabled = true;
                 activatedArea = _rightArea;
                 break;
             case EntityStates.IdleLeft: case EntityStates.MoveLeft:
-                _currentState = EntityStates.AttackingLeft;
+                CurrentState = EntityStates.AttackingLeft;
                 _leftArea.enabled = true;
                 activatedArea = _leftArea;
                 break;
             case EntityStates.IdleUp: case EntityStates.MoveUp:
-                _currentState = EntityStates.AttackingUp;
+                CurrentState = EntityStates.AttackingUp;
                 _upArea.enabled = true;
                 activatedArea = _upArea;
                 break;
             case EntityStates.IdleDown: case EntityStates.MoveDown:
-                _currentState = EntityStates.AttackingDown;
+                CurrentState = EntityStates.AttackingDown;
                 _downArea.enabled = true;
                 activatedArea = _downArea;
                 break;
@@ -113,6 +128,23 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(.333f); //anim length.
         _isAttacking = false;
         if (activatedArea) activatedArea.enabled = false;
+    }
+
+    private IEnumerator _Damage(Vector3 enemyPos)
+    {
+        _isBeingDamaged = true;
+        Health--;
+        OnDamaged?.Invoke();
+        if (Health <= 0)
+        {
+            print("Player Death");
+            yield return null;
+        }
+        
+        Vector2 dir = transform.position - enemyPos;
+        _rb.AddForce(dir * 3, ForceMode2D.Impulse);
+        yield return new WaitForSeconds(.5f);
+        _isBeingDamaged = false;
     }
 }
 

@@ -3,27 +3,24 @@ using UnityEngine;
 
 public class PlayerInput : MonoBehaviour
 {
-    private InputSystem_Actions _input;
-    private Vector2 _moveInput;
-
-    public Vector2 MoveInput => _moveInput;
-    public InputSystem_Actions PlayerActions => _input;
-
+    public InputSystem_Actions PlayerActions { get; private set; }
+    public Vector2 MoveInput { get; private set; }
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        _input = new InputSystem_Actions();
-        _input.Player.Enable();
+        PlayerActions = new InputSystem_Actions();
+        PlayerActions.Player.Enable();
     }
 
     private void OnDisable()
     {
-        _input.Player.Disable();
+        PlayerActions.Player.Disable();
     }
 
     // Update is called once per frame
     void Update()
     {
-        _moveInput = _input.Player.Move.ReadValue<Vector2>();
+        MoveInput = PlayerActions.Player.Move.ReadValue<Vector2>();
     }
 }

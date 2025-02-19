@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class PlayerAnimationController : MonoBehaviour
@@ -11,6 +12,12 @@ public class PlayerAnimationController : MonoBehaviour
     void Start()
     {
         _controller = GetComponent<PlayerController>();
+        _controller.OnDamaged += ControllerOnDamaged;
+    }
+
+    private void ControllerOnDamaged()
+    {
+        StartCoroutine(_ChangeSpriteColorTemp(.5f));
     }
 
     // Update is called once per frame
@@ -69,5 +76,13 @@ public class PlayerAnimationController : MonoBehaviour
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+    
+    /// Change the color of a sprite for a duration.
+    private IEnumerator _ChangeSpriteColorTemp(float duration)
+    {
+        _spriteRenderer.color = Color.red;
+        yield return new WaitForSeconds(duration);
+        _spriteRenderer.color = Color.white;
     }
 }
