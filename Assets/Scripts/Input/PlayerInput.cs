@@ -23,4 +23,9 @@ public class PlayerInput : MonoBehaviour
     {
         MoveInput = PlayerActions.Player.Move.ReadValue<Vector2>();
     }
+    
+    public void Disable()
+    {
+        PlayerActions.Player.Disable();
+    }
 }

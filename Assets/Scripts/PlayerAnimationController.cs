@@ -15,6 +15,11 @@ public class PlayerAnimationController : MonoBehaviour
         _controller.OnDamaged += ControllerOnDamaged;
     }
 
+    private void OnDisable()
+    {
+        _controller.OnDamaged -= ControllerOnDamaged;
+    }
+
     private void ControllerOnDamaged()
     {
         StartCoroutine(_ChangeSpriteColorTemp(.5f));

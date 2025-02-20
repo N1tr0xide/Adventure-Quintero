@@ -121,8 +121,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fab440eb465b95c4c81816a9ac636a7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _maxHealth: 2
   _chaseDistance: 3
   _speed: 1.5
+  _playerHitForce: 4
+  _coinPrefab: {fileID: 5058228877269993639, guid: 2edaa201a9ef1ef4292041c447f58c61, type: 3}
 --- !u!114 &884346781623707675
 MonoBehaviour:
   m_ObjectHideFlags: 0

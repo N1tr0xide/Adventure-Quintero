@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class SlimeAI : MonoBehaviour
@@ -8,8 +9,9 @@ public class SlimeAI : MonoBehaviour
     private Rigidbody2D _rb;
     private bool _isPlayerInRange, _isBeingDamaged;
     private int _currentHealth;
-    private readonly int _maxHealth = 2;
-    [SerializeField] private float _chaseDistance, _speed;
+    [SerializeField] private int _maxHealth = 2;
+    [SerializeField] private float _chaseDistance, _speed, _playerHitForce = 4;
+    [SerializeField] private GameObject _coinPrefab;
 
     public float XSpeed => _rb.linearVelocity.x;
     public event Action OnDamaged;
@@ -49,7 +51,8 @@ public class SlimeAI : MonoBehaviour
         _currentHealth -= damage;
         if (_currentHealth <= 0)
         {
-            Destroy(gameObject);
+            OnDamaged?.Invoke();
+            StartCoroutine(_Damage(.5f, true));
             return;
         }
 
@@ -57,11 +60,19 @@ public class SlimeAI : MonoBehaviour
         StartCoroutine(_Damage(.5f));
     }
 
-    private IEnumerator _Damage(float delay)
+    private IEnumerator _Damage(float delay, bool kill = false)
     {
         Vector2 dir = transform.position - _player.transform.position;
-        _rb.AddForce(dir * 4, ForceMode2D.Impulse);
+        _rb.AddForce(dir * _playerHitForce, ForceMode2D.Impulse);
         yield return new WaitForSeconds(delay);
+
+        if (kill)
+        {
+            Instantiate(_coinPrefab, transform.position, quaternion.identity);
+            Destroy(gameObject);
+            yield return null;
+        }
+        
         _isBeingDamaged = false;
     }
 

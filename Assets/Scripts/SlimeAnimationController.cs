@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -13,6 +14,11 @@ public class SlimeAnimationController : MonoBehaviour
     {
         _ai = GetComponent<SlimeAI>();
         _ai.OnDamaged += AiOnDamaged;
+    }
+
+    private void OnDisable()
+    {
+        _ai.OnDamaged -= AiOnDamaged;
     }
 
     private void AiOnDamaged()
