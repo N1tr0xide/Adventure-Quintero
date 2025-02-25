@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 
 public class SlimeAI : MonoBehaviour
@@ -79,5 +80,11 @@ public class SlimeAI : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(transform.position, _chaseDistance);
+    }
+
+    public void Disable()
+    {
+        _rb.linearVelocity = Vector2.zero;
+        enabled = false;
     }
 }

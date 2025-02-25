@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerHUDController : MonoBehaviour
@@ -28,10 +29,10 @@ public class PlayerHUDController : MonoBehaviour
         _playerController.onGameOver += PlayerOnGameOver;
     }
 
-    private void PlayerOnGameOver(bool obj)
+    private void PlayerOnGameOver(bool hasWon)
     {
         _gameOverPanel.SetActive(true);
-        _gameOverText.text = obj ? "YOU WIN!" : "YOU LOSE";
+        _gameOverText.text = hasWon ? "YOU WIN!" : "YOU LOSE";
     }
 
     private void OnDisable()
@@ -58,5 +59,15 @@ public class PlayerHUDController : MonoBehaviour
             bool active = i < _playerController.Health && _playerController.Health != 0;
             _heartsUI[i].SetActive(active);
         }
+    }
+
+    public void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void Quit()
+    {
+        Application.Quit();
     }
 }

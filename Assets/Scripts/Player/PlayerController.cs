@@ -10,8 +10,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D _rb;
     private bool _isAttacking, _isBeingDamaged;
     private const int MaxHealth = 6;
-    private int _money;
-    private int _chestRemaining = 3;
+    private int _money, _chestsRemaining = 3;
 
     [SerializeField] private float _speed;
     [Header("Attack Areas")]
@@ -40,7 +39,7 @@ public class PlayerController : MonoBehaviour
         _input.PlayerActions.Player.Attack.performed += OnAttack;
         onGameOver += OnGameOver;
         OnMoneyChanged?.Invoke(_money);
-        OnChestOpened?.Invoke(_chestRemaining);
+        OnChestOpened?.Invoke(_chestsRemaining);
         
         //disable attack area
         _upArea.enabled = false;
@@ -52,11 +51,15 @@ public class PlayerController : MonoBehaviour
     private void OnDisable()
     {
         onGameOver -= OnGameOver;
+        _input.PlayerActions.Player.Attack.performed -= OnAttack;
     }
 
     private void OnGameOver(bool win)
     {
         _input.Disable();
+        SlimeAI[] slimesAi = FindObjectsByType<SlimeAI>(FindObjectsSortMode.None);
+
+        foreach (var ai in slimesAi) ai.Disable();
     }
 
     // Update is called once per frame
@@ -135,11 +138,11 @@ public class PlayerController : MonoBehaviour
         else if (other.gameObject.CompareTag("Chest"))
         {
             _money += other.GetComponent<TreasureChest>().OpenChest();
-            _chestRemaining--;
+            _chestsRemaining--;
             OnMoneyChanged?.Invoke(_money);
-            OnChestOpened?.Invoke(_chestRemaining);
+            OnChestOpened?.Invoke(_chestsRemaining);
 
-            if (_chestRemaining <= 0) onGameOver?.Invoke(true);
+            if (_chestsRemaining <= 0) onGameOver?.Invoke(true);
         }
     }
 

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f928fe55e7645ce4b912298b1b20b775, type: 3}
+  m_Name: Coin Clips
+  m_EditorClassIdentifier: 
+  _clips:
+  - {fileID: 8300000, guid: d13b78ba9bae47a4183a600012a6582e, type: 3}
+  - {fileID: 8300000, guid: c2cb841f564b10a4eaf6e429205634fe, type: 3}
+  - {fileID: 8300000, guid: d7ebae5e54f78e3468975d8be8c88b5e, type: 3}
+  - {fileID: 8300000, guid: 32d422cd7c6205745b06277b2321921a, type: 3}
+  - {fileID: 8300000, guid: c60013e0a1b6eb54489857cca6187597, type: 3}
+  - {fileID: 8300000, guid: f9d6d3b6d0623364d979034324c585a4, type: 3}
